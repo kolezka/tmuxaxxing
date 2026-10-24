@@ -1,3 +1,5 @@
 .superpowers/
 node_modules/
 .DS_Store
+mod/tsconfig.json
+mod/.claude-plugin/types/
