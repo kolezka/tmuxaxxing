@@ -30,6 +30,7 @@ function pane(paneId: string, overrides: Partial<PaneInfo> = {}): PaneInfo {
     windowId: "@1",
     windowIndex: 1,
     slot: null,
+    autoNamed: true,
     ...overrides,
   };
 }
@@ -96,10 +97,18 @@ describe("buildAgentsModel", () => {
   });
 
   test("a window with its own name is labelled by that name", () => {
-    const panes = [pane("%1", { window: "billing" })];
+    const panes = [pane("%1", { window: "billing", autoNamed: false })];
     const model = buildAgentsModel([entry(record({ paneId: "%1", cwd: "/x/api" }))], new Map(), new Map(), panes);
 
     expect(model.groups.map((g) => g.label)).toEqual(["billing"]);
+  });
+
+  // Claude Code sets its process title to its version, so tmux auto-names the window "2.1.310".
+  test("any auto-named window is labelled by cwd basename, whatever tmux called it", () => {
+    const panes = [pane("%1", { window: "2.1.310", autoNamed: true })];
+    const model = buildAgentsModel([entry(record({ paneId: "%1", cwd: "/x/repo" }))], new Map(), new Map(), panes);
+
+    expect(model.groups.map((g) => g.label)).toEqual(["repo"]);
   });
 
   test("panes of one window share one group", () => {

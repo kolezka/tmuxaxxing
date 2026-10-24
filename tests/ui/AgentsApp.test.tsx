@@ -65,6 +65,7 @@ function paneFor(r: AgentRecord, index: number): PaneInfo {
     windowId: `@${index}`,
     windowIndex: index,
     slot: null,
+    autoNamed: true,
   };
 }
 

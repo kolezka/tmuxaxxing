@@ -39,7 +39,7 @@ function fakeTmux(screen: string): FakeTmux {
   const fake: FakeTmux = {
     sent: [],
     screen,
-    panes: [{ paneId: PANE, pid: process.pid, session: "s", window: "1", windowId: "@1", windowIndex: 1, slot: null }],
+    panes: [{ paneId: PANE, pid: process.pid, session: "s", window: "1", windowId: "@1", windowIndex: 1, slot: null, autoNamed: true }],
     async listPanes() {
       return fake.panes;
     },

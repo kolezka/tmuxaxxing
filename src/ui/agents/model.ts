@@ -17,7 +17,7 @@ export type AgentsModel = {
   errors: Row[];
 };
 
-// tmux names a window after its running command, which says nothing about the project.
+// Fallback for a record whose pane is not in the live list; live panes use tmux's automatic-rename flag.
 const GENERIC_WINDOW_NAMES = new Set(["claude", "node", "bun", "zsh", "bash", "fish", "sh", "login"]);
 
 function displayOf(record: AgentRecord, answered: Map<string, Answered>): Display {
@@ -58,7 +58,7 @@ export function buildAgentsModel(
         key,
         session: pane?.session ?? row.record.session,
         windowIndex: pane?.windowIndex ?? Number.MAX_SAFE_INTEGER,
-        label: GENERIC_WINDOW_NAMES.has(windowName) ? basename(row.record.cwd) : windowName,
+        label: (pane ? pane.autoNamed : GENERIC_WINDOW_NAMES.has(windowName)) ? basename(row.record.cwd) : windowName,
         rows: [],
       };
       groups.set(key, group);

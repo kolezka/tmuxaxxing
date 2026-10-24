@@ -74,6 +74,16 @@ describe("createTmux against an isolated server", () => {
     expect(pane!.slot).toBe("agents");
   });
 
+  // A window made without -n keeps automatic-rename on; renaming it turns that off.
+  test("autoNamed is true until the window is renamed", async () => {
+    const autoPane = (await tmux.run(["new-window", "-d", "-P", "-F", "#{pane_id}", "/bin/sh"])).trim();
+    expect((await tmux.listPanes()).find((p) => p.paneId === autoPane)!.autoNamed).toBe(true);
+    await tmux.run(["rename-window", "-t", autoPane, "billing"]);
+    const pane = (await tmux.listPanes()).find((p) => p.paneId === autoPane)!;
+    expect(pane.autoNamed).toBe(false);
+    expect(pane.window).toBe("billing");
+  });
+
   test("run rejects with tmux's error on a failing command", async () => {
     await expect(tmux.run(["has-session", "-t", "no-such-session"])).rejects.toThrow(/can't find session/);
   });
@@ -89,8 +99,8 @@ describe("isPidAlive and livenessFrom", () => {
 
   test("livenessFrom collects pane ids", () => {
     const panes: PaneInfo[] = [
-      { paneId: "%1", pid: 1, session: "s", window: "w", windowId: "@1", windowIndex: 1, slot: null },
-      { paneId: "%7", pid: 2, session: "s", window: "w", windowId: "@1", windowIndex: 1, slot: "feed" },
+      { paneId: "%1", pid: 1, session: "s", window: "w", windowId: "@1", windowIndex: 1, slot: null, autoNamed: true },
+      { paneId: "%7", pid: 2, session: "s", window: "w", windowId: "@1", windowIndex: 1, slot: "feed", autoNamed: true },
     ];
     const live = livenessFrom(panes);
     expect([...live.panes].sort()).toEqual(["%1", "%7"]);

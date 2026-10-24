@@ -8,6 +8,8 @@ export type PaneInfo = {
   windowId: string;
   windowIndex: number;
   slot: string | null;
+  // True while tmux names the window after its command, i.e. nobody renamed it.
+  autoNamed: boolean;
 };
 
 export type Tmux = {
@@ -19,11 +21,11 @@ export type Tmux = {
 };
 
 // Names can hold spaces, so fields are tab separated and window_name goes last.
-const PANE_FORMAT = ["#{pane_id}", "#{pane_pid}", "#{window_id}", "#{window_index}", "#{@tmuxaxxing_slot}", "#{session_name}", "#{window_name}"].join("\t");
+const PANE_FORMAT = ["#{pane_id}", "#{pane_pid}", "#{window_id}", "#{window_index}", "#{@tmuxaxxing_slot}", "#{automatic-rename}", "#{session_name}", "#{window_name}"].join("\t");
 
 function parsePaneLine(line: string): PaneInfo {
-  const [paneId, pid, windowId, windowIndex, slot, session, ...windowParts] = line.split("\t");
-  if (!paneId || !pid || !windowId || !windowIndex || session === undefined || windowParts.length === 0) {
+  const [paneId, pid, windowId, windowIndex, slot, autoRename, session, ...windowParts] = line.split("\t");
+  if (!paneId || !pid || !windowId || !windowIndex || autoRename === undefined || session === undefined || windowParts.length === 0) {
     throw new Error(`tmux list-panes: unexpected line: ${JSON.stringify(line)}`);
   }
   return {
@@ -34,6 +36,7 @@ function parsePaneLine(line: string): PaneInfo {
     windowId,
     windowIndex: Number(windowIndex),
     slot: slot ? slot : null,
+    autoNamed: autoRename === "1",
   };
 }
 
