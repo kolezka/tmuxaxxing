@@ -1,0 +1,2 @@
+kind = "tui"
+command = "bun ../../src/cli.ts agents"

@@ -6,6 +6,7 @@ export type PaneInfo = {
   session: string;
   window: string;
   windowId: string;
+  windowIndex: number;
   slot: string | null;
 };
 
@@ -18,11 +19,11 @@ export type Tmux = {
 };
 
 // Names can hold spaces, so fields are tab separated and window_name goes last.
-const PANE_FORMAT = ["#{pane_id}", "#{pane_pid}", "#{window_id}", "#{@tmuxaxxing_slot}", "#{session_name}", "#{window_name}"].join("\t");
+const PANE_FORMAT = ["#{pane_id}", "#{pane_pid}", "#{window_id}", "#{window_index}", "#{@tmuxaxxing_slot}", "#{session_name}", "#{window_name}"].join("\t");
 
 function parsePaneLine(line: string): PaneInfo {
-  const [paneId, pid, windowId, slot, session, ...windowParts] = line.split("\t");
-  if (!paneId || !pid || !windowId || session === undefined || windowParts.length === 0) {
+  const [paneId, pid, windowId, windowIndex, slot, session, ...windowParts] = line.split("\t");
+  if (!paneId || !pid || !windowId || !windowIndex || session === undefined || windowParts.length === 0) {
     throw new Error(`tmux list-panes: unexpected line: ${JSON.stringify(line)}`);
   }
   return {
@@ -31,6 +32,7 @@ function parsePaneLine(line: string): PaneInfo {
     session,
     window: windowParts.join("\t"),
     windowId,
+    windowIndex: Number(windowIndex),
     slot: slot ? slot : null,
   };
 }

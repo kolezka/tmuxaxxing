@@ -56,6 +56,7 @@ describe("createTmux against an isolated server", () => {
     expect(pane!.session).toBe("tmxtest");
     expect(pane!.window).toBe("work");
     expect(pane!.windowId).toMatch(/^@\d+$/);
+    expect(pane!.windowIndex).toBe(0);
     expect(pane!.pid).toBeGreaterThan(0);
     expect(isPidAlive(pane!.pid)).toBe(true);
     expect(pane!.slot).toBeNull();
@@ -88,8 +89,8 @@ describe("isPidAlive and livenessFrom", () => {
 
   test("livenessFrom collects pane ids", () => {
     const panes: PaneInfo[] = [
-      { paneId: "%1", pid: 1, session: "s", window: "w", windowId: "@1", slot: null },
-      { paneId: "%7", pid: 2, session: "s", window: "w", windowId: "@1", slot: "feed" },
+      { paneId: "%1", pid: 1, session: "s", window: "w", windowId: "@1", windowIndex: 1, slot: null },
+      { paneId: "%7", pid: 2, session: "s", window: "w", windowId: "@1", windowIndex: 1, slot: "feed" },
     ];
     const live = livenessFrom(panes);
     expect([...live.panes].sort()).toEqual(["%1", "%7"]);

@@ -1,9 +1,13 @@
+import { agents } from "./cli/agents";
+import { seen } from "./cli/seen";
 import { sidebar } from "./cli/sidebar";
 import { widths } from "./cli/widths";
 
 type Command = (args: string[]) => Promise<void>;
 
 const commands = new Map<string, Command>([
+  ["agents", agents],
+  ["seen", seen],
   ["sidebar", sidebar],
   ["widths", widths],
 ]);
