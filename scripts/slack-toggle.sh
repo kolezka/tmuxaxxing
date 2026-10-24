@@ -6,11 +6,6 @@ if ! tmux_bin="$(command -v tmux)"; then
   exit 1
 fi
 
-if ! slk_bin="$(command -v slk)"; then
-  "$tmux_bin" display-message 'slk not found'
-  exit 1
-fi
-
 if [[ -n "${TMUX_PANE:-}" ]]; then
   current_session="$("$tmux_bin" display-message -p -t "$TMUX_PANE" '#{session_name}')"
 else
@@ -23,6 +18,11 @@ if [[ "$current_session" == 'slack' ]]; then
 fi
 
 if ! "$tmux_bin" has-session -t '=slack' 2>/dev/null; then
+  # Only creating the session needs slk, so a missing slk never blocks the way back.
+  if ! slk_bin="$(command -v slk)"; then
+    "$tmux_bin" display-message 'slk not found'
+    exit 1
+  fi
   printf -v slk_command '%q' "$slk_bin"
   "$tmux_bin" new-session -d -s slack "$slk_command"
 fi
