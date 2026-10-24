@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { rmSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { createTmux, type Tmux } from "../../src/tmux/tmux";
@@ -109,6 +109,34 @@ describe("sidebar tmux wiring", () => {
     expect(await slotPanes(workWindow)).toHaveLength(2);
     expect(await slotPanes(slackWindow)).toHaveLength(0);
   });
+
+  // macOS ships bash 3.2, where an empty array under `set -u` is an unbound variable.
+  test.skipIf(!existsSync("/bin/bash"))(
+    "every script runs under /bin/bash without a test socket",
+    async () => {
+      const windowId = await createSession(`bash32-${sequence++}`);
+      const env: Record<string, string> = {
+        PATH: process.env.PATH ?? "/usr/bin:/bin",
+        HOME: process.env.HOME ?? "/tmp",
+        TMUX: `${socketPath},0,0`,
+        TMUXAXXING_ROOT: root,
+        TMUXAXXING_SIDEBAR_CMD: "sleep 600",
+      };
+      const runs = [
+        ["ensure-sidebars.sh", windowId],
+        ["toggle-sidebar.sh", "right"],
+        ["toggle-sidebar.sh", "right"],
+        ["reload.sh"],
+        ["slack-toggle.sh"],
+      ];
+      for (const [script, ...args] of runs) {
+        const proc = Bun.spawnSync(["/bin/bash", `${root}/scripts/${script}`, ...args], { env });
+        expect(proc.stderr.toString()).not.toContain("unbound variable");
+      }
+      await waitFor(async () => (await slotPanes(windowId)).length === 2);
+      expect(await slotPanes(windowId)).toHaveLength(2);
+    },
+  );
 
   test("turning the left sidebar off removes it from every window", async () => {
     const firstWindow = await createSession(`toggle-a-${sequence++}`);

@@ -17,7 +17,7 @@ if [[ -n "${TMUXAXXING_TMUX_SOCKET:-}" ]]; then
 fi
 
 tmux_cmd() {
-  "$tmux_bin" "${tmux_args[@]}" "$@"
+  "$tmux_bin" ${tmux_args[@]+"${tmux_args[@]}"} "$@"
 }
 
 while IFS='|' read -r pane_id slot; do

@@ -22,7 +22,7 @@ cd tmuxaxxing
 ./scripts/install.sh
 ```
 
-The script installs dependencies and prints the lines to add to `~/.tmux.conf`. It never edits your config. Sessions report their state through a Claude Code mod, so start Claude with `claude --plugin-dir <repo>/mod`, or add `<repo>/mod` to `CLAUDE_CODE_PLUGIN_DIRS`.
+The script installs dependencies and prints the lines to add to `~/.tmux.conf`. It never edits your config. Sourcing `tmux/tmuxaxxing.tmux.conf` sets `status-right`, `status-interval` and the window-status formats, so put any of your own overrides after it. Sessions report their state through a Claude Code mod, so start Claude with `claude --plugin-dir <repo>/mod`, or add `<repo>/mod` to `CLAUDE_CODE_PLUGIN_DIRS`.
 
 ## Keys
 

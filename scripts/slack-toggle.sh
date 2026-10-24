@@ -12,7 +12,7 @@ if [[ -n "${TMUXAXXING_TMUX_SOCKET:-}" ]]; then
 fi
 
 tmux_cmd() {
-  "$tmux_bin" "${tmux_args[@]}" "$@"
+  "$tmux_bin" ${tmux_args[@]+"${tmux_args[@]}"} "$@"
 }
 
 if [[ -n "${TMUX_PANE:-}" ]]; then
