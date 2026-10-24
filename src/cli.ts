@@ -1,4 +1,5 @@
 import { sidebar } from "./cli/sidebar";
+import { status } from "./cli/status";
 import { widths } from "./cli/widths";
 
 type Command = (args: string[]) => Promise<void>;
@@ -6,6 +7,7 @@ type Command = (args: string[]) => Promise<void>;
 const commands = new Map<string, Command>([
   ["sidebar", sidebar],
   ["widths", widths],
+  ["status", status],
 ]);
 
 export async function main(args: string[]): Promise<void> {
