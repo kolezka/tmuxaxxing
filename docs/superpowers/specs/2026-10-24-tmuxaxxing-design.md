@@ -1,7 +1,7 @@
 # tmuxaxxing: design
 
 Date: 2026-10-24
-Status: draft, awaiting approval
+Status: approved by owner, 2026-10-24
 
 ## Intent
 

@@ -1,0 +1,3 @@
+kind = "feed"
+command = "bun ./feed.ts"
+refresh = "2m"
