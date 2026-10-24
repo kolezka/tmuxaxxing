@@ -1,0 +1,45 @@
+
+
+❯ Run exactly this with the Bash tool: touch yes-marker.txt
+ 57 chars
+  ⎿  UserPromptSubmit says: Hindsight · goal: recall this repo's past decisions about “Run exactly this with the Bash tool: touch yes-m…”
+     ↳ - Reusable lesson (REF-ID: e416, recorded 2026-08-03): before handing a user a command framed as "run this to verify X", check the command's…
+
+  Ran 1 shell command
+ group of 1 calls
+
+⏺ Ran touch yes-marker.txt.
+ 3 words
+                                                                                                                                                    · 10.2s
+✻ Worked for 10s · done 19:35                                                                                                                       exact
+
+⏺ worklog-persist+all-elements+behavior-demo+cc-plugin-agents-md: all-elements: 1 tool calls · 10.2s · session $0.16
+
+❯ Run exactly this with the Bash tool: touch no-marker.txt
+ 56 chars
+
+  Ran 1 shell command
+  ⎿  Interrupted · What should Claude do instead?
+ group of 1 calls
+                                                                                                                                                     · 2.9s
+✻ Churned for 2s · done 19:35                                                                                                                        exact
+
+⏺ worklog-persist+all-elements+behavior-demo+cc-plugin-agents-md: all-elements: 1 tool calls · 2.9s · session $0.19
+
+❯ Use the Write tool to create esc-marker.txt containing hello. Do not use Bash.
+ 78 chars
+#3
+   ⏺ Write(esc-marker.txt)
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ Create file
+ esc-marker.txt
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+  1 hello
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+ Do you want to create esc-marker.txt?
+ ❯ 1. Yes
+   2. Yes, and switch to accept edits (auto-approve file edits and common file commands) for this session (shift+tab)
+   3. No
+
+ Esc to cancel · Tab to amend
