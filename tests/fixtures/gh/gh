@@ -1,0 +1,3 @@
+#!/bin/sh
+printf '%s\n' 'HTTP 401' >&2
+exit 1
