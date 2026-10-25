@@ -13,12 +13,13 @@ type GraphQlPullRequest = {
 };
 
 type GraphQlResponse = {
-  data?: { search?: { nodes?: GraphQlPullRequest[] } };
+  data?: { search?: { issueCount?: number; nodes?: GraphQlPullRequest[] } };
   errors?: Array<{ message?: string }>;
 };
 
 const graphqlQuery = `query SearchPullRequests($search: String!) {
   search(query: $search, type: ISSUE, first: 100) {
+    issueCount
     nodes {
       ... on PullRequest {
         number
@@ -91,7 +92,7 @@ function normalize(pr: GraphQlPullRequest): GhPr {
   };
 }
 
-function fetchPrs(search: string): GhPr[] {
+function fetchPrs(search: string): { items: GhPr[]; total: number } {
   const result = Bun.spawnSync(
     ["gh", "api", "graphql", "-f", `query=${graphqlQuery}`, "-f", `search=${search}`],
     { stdout: "pipe", stderr: "pipe" },
@@ -112,15 +113,31 @@ function fetchPrs(search: string): GhPr[] {
     throw new Error(`${response.errors.map((error) => error.message ?? "GraphQL error").join("; ")}\n`);
   }
 
-  return (response.data?.search?.nodes ?? []).map(normalize);
+  const searchResult = response.data?.search;
+  if (typeof searchResult?.issueCount !== "number") {
+    throw new Error("gh response did not include search.issueCount\n");
+  }
+
+  return {
+    items: (searchResult.nodes ?? []).map(normalize),
+    total: searchResult.issueCount,
+  };
 }
 
 try {
+  const review = fetchPrs(searches.review);
+  const mine = fetchPrs(searches.mine);
+  const assigned = fetchPrs(searches.assigned);
   const feed = mapPrsToFeed(
     {
-      review: fetchPrs(searches.review),
-      mine: fetchPrs(searches.mine),
-      assigned: fetchPrs(searches.assigned),
+      review: review.items,
+      mine: mine.items,
+      assigned: assigned.items,
+      totals: {
+        review: review.total,
+        mine: mine.total,
+        assigned: assigned.total,
+      },
     },
     Date.now(),
   );

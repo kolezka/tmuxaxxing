@@ -59,15 +59,34 @@ function mapPr(pr: GhPr, now: number, mine: boolean): FeedItem {
   };
 }
 
+function sectionTitle(label: string, prs: GhPr[], total: number): string {
+  const count = prs.length < total ? `${prs.length} of ${total}` : `${prs.length}`;
+  return `${label} (${count})`;
+}
+
 export function mapPrsToFeed(
-  input: { review: GhPr[]; mine: GhPr[]; assigned: GhPr[] },
+  input: {
+    review: GhPr[];
+    mine: GhPr[];
+    assigned: GhPr[];
+    totals: { review: number; mine: number; assigned: number };
+  },
   now: number,
 ): Feed {
   return {
     sections: [
-      { title: "REVIEW REQUESTS", items: input.review.map((pr) => mapPr(pr, now, false)) },
-      { title: "MY OPEN PRS", items: input.mine.map((pr) => mapPr(pr, now, true)) },
-      { title: "ASSIGNED TO ME", items: input.assigned.map((pr) => mapPr(pr, now, false)) },
+      {
+        title: sectionTitle("REVIEW REQUESTS", input.review, input.totals.review),
+        items: input.review.map((pr) => mapPr(pr, now, false)),
+      },
+      {
+        title: sectionTitle("MY OPEN PRS", input.mine, input.totals.mine),
+        items: input.mine.map((pr) => mapPr(pr, now, true)),
+      },
+      {
+        title: sectionTitle("ASSIGNED TO ME", input.assigned, input.totals.assigned),
+        items: input.assigned.map((pr) => mapPr(pr, now, false)),
+      },
     ],
   };
 }
