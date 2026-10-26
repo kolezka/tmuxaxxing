@@ -85,4 +85,4 @@ bun test
 bunx tsc --noEmit -p .
 ```
 
-Design and plans are in `docs/superpowers/`. Manual checks for the tmux behaviour are in `docs/manual-checks.md`.
+How the pieces fit, from the tmux hook that splits the panes to the mod that writes agent state, is in `docs/architecture.md`. Design and plans are in `docs/superpowers/`. Manual checks for the tmux behaviour are in `docs/manual-checks.md`.
