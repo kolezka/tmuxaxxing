@@ -1,9 +1,10 @@
 import { Box, Text, useInput } from "ink";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { FeedView } from "../feed/runner";
 import type { FeedItem } from "../feed/schema";
 import { inkColor } from "./colors";
+import { useMouse, type MouseEvent } from "./mouse";
 import { visibleRange } from "./window";
 
 type PanelItem = {
@@ -14,9 +15,13 @@ export type FeedPanelProps = {
   view: FeedView;
   width: number;
   height: number;
+  // Rows drawn above the panel by its parent, so a click row maps to a panel line.
+  top?: number;
   onAction(item: FeedItem): void;
   onRefresh(): void;
 };
+
+export const FEED_HINT = "click/⏎ open  r refresh";
 
 function truncate(value: string, width: number): string {
   if (width <= 0) {
@@ -52,7 +57,7 @@ function Row({ item, selected, width }: { item: FeedItem; selected: boolean; wid
   );
 }
 
-export function FeedPanel({ view, width, height, onAction, onRefresh }: FeedPanelProps): React.ReactNode {
+export function FeedPanel({ view, width, height, top = 0, onAction, onRefresh }: FeedPanelProps): React.ReactNode {
   const items = useMemo<PanelItem[]>(
     () => view.feed?.sections.flatMap((section) => section.items.map((item) => ({ item }))) ?? [],
     [view.feed],
@@ -63,6 +68,13 @@ export function FeedPanel({ view, width, height, onAction, onRefresh }: FeedPane
   useEffect(() => {
     setSelected((current) => Math.min(current, Math.max(0, items.length - 1)));
   }, [items.length]);
+
+  const headerRows = view.feed
+    ? (view.error ? 1 : 0) +
+      view.feed.sections.reduce((count, section) => count + 1 + (section.items.length === 0 ? 1 : 0), 0)
+    : 0;
+  const hintRows = height - headerRows > 2 ? 1 : 0;
+  const range = visibleRange(items.length, selectedIndex, height - headerRows - hintRows);
 
   useInput((input, key) => {
     if (key.return) {
@@ -84,17 +96,33 @@ export function FeedPanel({ view, width, height, onAction, onRefresh }: FeedPane
     }
   });
 
+  const onMouse = useCallback(
+    (event: MouseEvent) => {
+      if (event.button === "wheel-down") {
+        setSelected((current) => Math.min(current + 1, Math.max(0, items.length - 1)));
+        return;
+      }
+      if (event.button === "wheel-up") {
+        setSelected((current) => Math.max(0, current - 1));
+        return;
+      }
+      if (event.button !== "left" || !event.pressed) return;
+      const itemLine = event.y - 1 - top - headerRows;
+      if (itemLine >= 0 && itemLine < range.end - range.start) {
+        const index = range.start + itemLine;
+        setSelected(index);
+        const target = items[index];
+        if (target) onAction(target.item);
+      }
+    },
+    [items, top, headerRows, range.start, range.end, onAction],
+  );
+  useMouse(onMouse);
+
   if (!view.feed) {
     return view.error ? <Text color="red">{`${view.error}${view.stale ? " (stale)" : ""}`}</Text> : null;
   }
 
-  const headerRows =
-    (view.error ? 1 : 0) +
-    view.feed.sections.reduce(
-      (count, section) => count + 1 + (section.items.length === 0 ? 1 : 0),
-      0,
-    );
-  const range = visibleRange(items.length, selectedIndex, height - headerRows);
   const visibleItems = items.slice(range.start, range.end);
 
   return (
@@ -109,6 +137,7 @@ export function FeedPanel({ view, width, height, onAction, onRefresh }: FeedPane
       {visibleItems.map(({ item }, index) => (
         <Row item={item} selected={range.start + index === selectedIndex} width={width} key={item.id} />
       ))}
+      {hintRows > 0 ? <Text dimColor>{truncate(FEED_HINT, width)}</Text> : null}
     </Box>
   );
 }
