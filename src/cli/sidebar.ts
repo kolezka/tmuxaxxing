@@ -7,7 +7,9 @@ import { discoverPlugins, resolveSlot, type PluginDef, type ResolvedSlot } from 
 import { LayoutError, loadLayout } from "../config/layout";
 import { getFeed, type FeedView } from "../feed/runner";
 import { configDir, stateDir } from "../paths";
+import { MouseProvider } from "../ui/mouse";
 import { SlotApp } from "../ui/SlotApp";
+import { withMouse } from "./mouse-stdin";
 
 function parseSlot(args: string[]): "left" | "right" {
   if (args.length !== 2 || args[0] !== "--slot" || (args[1] !== "left" && args[1] !== "right")) {
@@ -97,15 +99,25 @@ export async function sidebar(args: string[]): Promise<void> {
       timeoutMs: 20_000,
       force,
     });
+  const mouse = withMouse();
   const app = render(
-    React.createElement(SlotApp, {
-      slot,
-      width: slot.width,
-      height: process.stdout.rows ?? 24,
-      loadFeed,
-      runAction,
-    }),
+    React.createElement(
+      MouseProvider,
+      { source: mouse?.stdin.mouse ?? null },
+      React.createElement(SlotApp, {
+        slot,
+        width: slot.width,
+        height: process.stdout.rows ?? 24,
+        loadFeed,
+        runAction,
+      }),
+    ),
+    mouse ? { stdin: mouse.stdin } : undefined,
   );
 
-  await app.waitUntilExit();
+  try {
+    await app.waitUntilExit();
+  } finally {
+    mouse?.release();
+  }
 }

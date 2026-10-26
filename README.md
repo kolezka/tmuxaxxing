@@ -35,6 +35,8 @@ The script installs dependencies and prints the lines to add to `~/.tmux.conf`. 
 
 In a sidebar: `j`/`k` move, `Enter` opens the session or item, `r` refreshes, `Tab` switches between plugins in one sidebar. In the agents sidebar: `y` approves once, `x` rejects, `n` jumps to the next INBOX item.
 
+The mouse works too, with tmux's `mouse on`: click a row to open it, scroll the wheel to move the selection, click a plugin name to switch tabs, and click a key chip in the agents sidebar footer (`y:yes  x:no  n:next  ⏎:open`) to press that key. The sidebars turn mouse reporting on only when they run in a terminal, so piped runs stay plain.
+
 Approving from the sidebar presses the key in the real Claude Code dialog. It only ever sends "yes, once" or "no", and sends nothing if the question changed or the dialog is no longer on screen.
 
 ## Layout and plugins
