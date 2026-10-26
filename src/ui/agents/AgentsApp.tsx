@@ -10,6 +10,7 @@ import { readAgentDir } from "../../agents/state";
 import type { Color } from "../../feed/schema";
 import { livenessFrom, type Tmux } from "../../tmux/tmux";
 import { inkColor } from "../colors";
+import { useMouse, type MouseEvent } from "../mouse";
 import { visibleRange } from "../window";
 import { buildAgentsModel, type AgentsModel, type Display, type Row } from "./model";
 
@@ -25,6 +26,27 @@ type Flash = { text: string; color: string };
 
 const FLASH_MS = 3000;
 const SUMMARY_MAX_LINES = 3;
+
+// Key hints, one chip per action. A click on a chip presses its key.
+export const AGENT_HINTS: { key: string; label: string }[] = [
+  { key: "y", label: "yes" },
+  { key: "x", label: "no" },
+  { key: "n", label: "next" },
+  { key: "\r", label: "open" },
+];
+
+export function hintLine(width: number): { text: string; spans: { start: number; end: number; key: string }[] } {
+  const spans: { start: number; end: number; key: string }[] = [];
+  let text = "";
+  for (const hint of AGENT_HINTS) {
+    const chip = `${hint.key === "\r" ? "⏎" : hint.key}:${hint.label}`;
+    const candidate = text ? `${text}  ${chip}` : chip;
+    if (candidate.length > width) break;
+    spans.push({ start: candidate.length - chip.length + 1, end: candidate.length, key: hint.key });
+    text = candidate;
+  }
+  return { text, spans };
+}
 
 const glyphs: Record<Display, string> = { idle: "○", working: "●", running: "●", ask: "?", done: "✓" };
 const colorOf: Record<Display, Color> = { idle: "dim", working: "work", running: "work", ask: "ask", done: "done" };
@@ -238,8 +260,8 @@ export function AgentsApp({ deps, width, height }: AgentsAppProps): React.ReactN
     await load();
   }
 
-  useInput((input, key) => {
-    if (key.return) {
+  function press(input: string): void {
+    if (input === "\r") {
       void jump(selected);
       return;
     }
@@ -252,7 +274,9 @@ export function AgentsApp({ deps, width, height }: AgentsAppProps): React.ReactN
       else if (character === "x") void approve("no", index);
     }
     if (index !== selected) select(index);
-  });
+  }
+
+  useInput((input, key) => press(key.return ? "\r" : input));
 
   const header = model ? `INBOX ${model.inbox.length}` : "INBOX";
   const footer: Flash | null = loadError ? { text: loadError, color: "red" } : flash;
@@ -260,8 +284,38 @@ export function AgentsApp({ deps, width, height }: AgentsAppProps): React.ReactN
   const selectedLine = Math.max(0, lines.findIndex((line) => line.item === selected));
   // At 32 columns the refusal message is one character too long for a single line.
   const footerLines = footer ? wrapWords(footer.text, width, 2) : [];
-  const bodyHeight = Math.max(0, height - 1 - footerLines.length);
+  const hints = height - 1 - footerLines.length > 2 ? hintLine(width) : null;
+  const bodyHeight = Math.max(0, height - 1 - footerLines.length - (hints ? 1 : 0));
   const range = visibleRange(lines.length, selectedLine, bodyHeight);
+  const hintRow = 1 + (range.end - range.start) + footerLines.length + 1;
+
+  const onMouse = useCallback(
+    (event: MouseEvent) => {
+      if (event.button === "wheel-down") {
+        press("j");
+        return;
+      }
+      if (event.button === "wheel-up") {
+        press("k");
+        return;
+      }
+      if (event.button !== "left" || !event.pressed) return;
+      if (hints && event.y === hintRow) {
+        const chip = hints.spans.find((span) => event.x >= span.start && event.x <= span.end);
+        if (chip) press(chip.key);
+        return;
+      }
+      // Row 1 is the header; a click on a session row (or its wrapped summary) opens it.
+      const line = lines[range.start + event.y - 2];
+      if (event.y >= 2 && line?.item !== undefined) {
+        select(line.item);
+        void jump(line.item);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hints, hintRow, lines, range.start, selected, items, model],
+  );
+  useMouse(onMouse);
 
   return (
     <Box flexDirection="column">
@@ -276,6 +330,11 @@ export function AgentsApp({ deps, width, height }: AgentsAppProps): React.ReactN
           {text}
         </Text>
       ))}
+      {hints ? (
+        <Text dimColor wrap="truncate">
+          {hints.text}
+        </Text>
+      ) : null}
     </Box>
   );
 }

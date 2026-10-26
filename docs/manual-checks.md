@@ -15,3 +15,8 @@ Set `TMUXAXXING_ROOT` in the tmux server before sourcing `tmux/tmuxaxxing.tmux.c
 - [ ] Trigger working, approval and done states. Confirm the status counters move.
 - [ ] Leave an approval or unseen done item in a window. Confirm the window status has a dot.
 - [ ] Click `slk` in the status line. Confirm it toggles Slack.
+- [ ] Click a PR row in the GitHub sidebar. Confirm the browser opens it and the `>` marker moves there.
+- [ ] Scroll the wheel over a sidebar. Confirm the selection moves one row per notch.
+- [ ] Click a session row in the agents sidebar. Confirm tmux jumps to that pane.
+- [ ] Click `⏎:open` in the agents footer. Confirm it opens the selected session.
+- [ ] Quit a sidebar (`prefix x`) and type in the shell that replaces it. Confirm no `[<0;...M` garbage appears.
